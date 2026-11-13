@@ -1,12 +1,208 @@
 <!doctype html>
 <html lang="sv">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Elprisdisplay</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17384f">
+<title>Konfigurera Elprisdisplay</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#17384f;background:#eef4f7}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(#e4eef3,#f8fbfc);min-height:100vh}
+main{max-width:520px;margin:auto;padding:24px 16px 48px}.card{background:#fff;border:1px solid #d7e3e9;border-radius:20px;padding:24px;box-shadow:0 8px 30px #17384f18}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:16px}.icon{width:44px;height:44px;display:grid;place-items:center;background:#fff0b8;border-radius:11px;font-size:24px}
+h1{font-size:1.65rem;margin:0 0 10px}.lead,.hint{color:#647d8d;line-height:1.5}.lead{margin:0 0 22px}.hint{font-size:.83rem;margin:7px 0 0}
+section{border-top:1px solid #e5edf1;padding-top:18px;margin-top:18px}.field{margin:15px 0}
+label{display:block;font-size:.92rem;font-weight:650;margin-bottom:7px}input,select,button{font:inherit}
+input,select{width:100%;min-height:48px;border:1px solid #9fb5c2;border-radius:10px;padding:11px 12px;background:#fff;color:#17384f}
+button{border:0;border-radius:10px;padding:13px 16px;font-weight:650;cursor:pointer}.primary{width:100%;min-height:48px;background:#175f84;color:#fff}.primary:disabled{opacity:.45;cursor:not-allowed}
+.status{margin-top:10px;padding:11px 13px;border-radius:10px;background:#e9f3f7;font-size:.9rem;line-height:1.45}.status.ok{background:#e4f4e9;color:#24603b}.status.error{background:#fceceb;color:#842d27}
+.link{background:transparent;color:#175f84;text-decoration:underline;padding:6px 0}.hide{display:none!important}.sub{margin-top:14px;padding:2px 14px 1px;border-left:3px solid #cbdde5;background:#f8fbfc;border-radius:0 10px 10px 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:48px}.row label{margin:0}.switch{position:relative;width:54px;height:30px;flex:none}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;background:#aabac4;border-radius:30px}.slider:before{content:"";position:absolute;width:24px;height:24px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 4px #0003;transition:.18s}.switch input:checked+.slider{background:#18759f}.switch input:checked+.slider:before{transform:translateX(24px)}
+.current{margin-top:10px;padding:10px 12px;background:#f1f7fa;border-radius:9px;font-size:.86rem}.done{margin-top:18px;padding:18px;text-align:center;background:#e3f5e8;border-radius:12px;color:#205d38}.small{font-size:.81rem;color:#6b8391;line-height:1.5;margin-top:18px}
+</style>
 </head>
 <body>
-  <h1>Elprisdisplay</h1>
-  <p>Konfigurationssidan fungerar.</p>
+<main><div class="card">
+<div class="brand"><div class="icon">⚡</div><div><strong>Elprisdisplay</strong><div class="hint">Konfiguration via Bluetooth</div></div></div>
+<h1>Konfigurera Elprisdisplay</h1>
+<p class="lead">Anslut till displayen, välj WiFi och ställ in elområde, moms och eventuell MQTT-telemetri.</p>
+
+<button id="connect" class="primary">1. Anslut Elprisdisplayen</button>
+<div id="bleStatus" class="status">Slå på Bluetooth och använd Chrome på Android eller Chrome/Edge på datorn.</div>
+
+<section>
+<label for="wifi">2. WiFi-nätverk (2,4 GHz)</label>
+<select id="wifi" disabled><option>Anslut till displayen först</option></select>
+<p id="signal" class="hint">Nätverken hämtas från själva displayen.</p>
+<button id="manualToggle" class="link hide" type="button">Mitt nätverk syns inte</button>
+<div id="manualWrap" class="field hide"><label for="manualWifi">Nätverksnamn (SSID)</label><input id="manualWifi" maxlength="32"></div>
+<div class="field"><label for="wifiPassword">WiFi-lösenord</label><input id="wifiPassword" type="password" autocomplete="new-password" disabled><p id="wifiHint" class="hint">Lösenordet skickas direkt till displayen via Bluetooth.</p></div>
+<div id="currentWifi" class="current hide"></div>
+</section>
+
+<section>
+<label for="zone">3. Elprisområde</label>
+<select id="zone">
+<option value="SE1">SE1 – Norra Sverige</option>
+<option value="SE2">SE2 – Norra Mellansverige</option>
+<option value="SE3" selected>SE3 – Södra Mellansverige</option>
+<option value="SE4">SE4 – Södra Sverige</option>
+</select>
+<div class="field row">
+<div><label for="vat">Visa priser inklusive moms</label><p class="hint">25 % moms läggs på både verkliga priser och prognoser.</p></div>
+<label class="switch"><input id="vat" type="checkbox" checked><span class="slider"></span></label>
+</div>
+</section>
+
+<section>
+<div class="row">
+<div><label for="mqtt">MQTT / Home Assistant</label><p class="hint">Telemetri skickas endast när WiFi ändå används.</p></div>
+<label class="switch"><input id="mqtt" type="checkbox"><span class="slider"></span></label>
+</div>
+<div id="mqttFields" class="sub hide">
+<div class="field"><label for="mqttHost">MQTT-server</label><input id="mqttHost" maxlength="128" placeholder="192.168.1.20"></div>
+<div class="field"><label for="mqttPort">Port</label><input id="mqttPort" type="number" min="1" max="65535" value="1883"></div>
+<div class="field"><label for="mqttUser">Användarnamn</label><input id="mqttUser" maxlength="64"></div>
+<div class="field"><label for="mqttPassword">Lösenord</label><input id="mqttPassword" type="password" maxlength="128" autocomplete="new-password"><p id="mqttHint" class="hint">Lämna tomt vid omkonfiguration för att behålla lagrat lösenord.</p></div>
+</div>
+</section>
+
+<section>
+<button id="save" class="primary" disabled>4. Spara konfiguration</button>
+<div id="saveStatus" class="status">Anslut först till Elprisdisplayen.</div>
+</section>
+<div id="done" class="done hide"><strong>✓ Konfiguration sparad</strong><p>Displayen startar om och återgår till normal drift.</p></div>
+<p class="small">Konfigurationsläge håller displayen vaken. Befintliga lösenord läses aldrig tillbaka till webbsidan.</p>
+</div></main>
+
+<script>
+(()=>{'use strict';
+const SVC='00467768-6228-2272-4663-277478268000';
+const STATE='00467768-6228-2272-4663-277478268001';
+const ERROR='00467768-6228-2272-4663-277478268002';
+const RPC='00467768-6228-2272-4663-277478268003';
+const NET='c0161234-4455-4f66-8777-123456789001';
+const CFG='c0161234-4455-4f66-8777-123456789002';
+const $=id=>document.getElementById(id),enc=new TextEncoder(),dec=new TextDecoder();
+let dev,netChar,cfgChar,rpcChar,stateChar,errorChar,networks=[],stored=null,saving=false,wifiResolve,wifiReject;
+
+function msg(id,text,kind=''){const e=$(id);e.textContent=text;e.className='status'+(kind?' '+kind:'')}
+function ssid(){return $('manualWrap').classList.contains('hide')?$('wifi').value:$('manualWifi').value.trim()}
+function net(){return networks.find(n=>n.ssid===ssid())}
+function protectedNet(){return $('manualWrap').classList.contains('hide')?(net()?.secured??true):true}
+function sameWifi(){return !!stored?.ssid&&ssid()===stored.ssid}
+function ready(){
+ let pw=true;if(ssid()&&protectedNet()&&!sameWifi())pw=$('wifiPassword').value.length>0;
+ const p=Number($('mqttPort').value);
+ const mq=!$('mqtt').checked||($('mqttHost').value.trim()&&Number.isInteger(p)&&p>0&&p<=65535);
+ $('save').disabled=!dev?.gatt?.connected||!ssid()||!pw||!mq||saving;
+}
+function mqttUi(){$('mqttFields').classList.toggle('hide',!$('mqtt').checked);ready()}
+function wifiUi(){
+ const same=sameWifi(),prot=protectedNet();
+ $('wifiPassword').disabled=!ssid()||!prot;
+ $('wifiPassword').placeholder=!prot?'Öppet nätverk':same?'Lämna tomt för att behålla':'WiFi-lösenord';
+ $('wifiHint').textContent=same?'Lämna tomt för att behålla det lagrade lösenordet.':'Lösenordet skickas direkt till displayen via Bluetooth.';
+ const n=net();$('signal').textContent=n?`Signal: ${n.rssi} dBm · ${n.secured?'Lösenord krävs':'Öppet nätverk'}`:'Nätverksnamnet anges manuellt.';
+ ready();
+}
+function apply(c){
+ stored=c||null;
+ if(c?.zone&&['SE1','SE2','SE3','SE4'].includes(c.zone))$('zone').value=c.zone;
+ if(typeof c?.includeVat==='boolean')$('vat').checked=c.includeVat;
+ if(typeof c?.mqtt?.enabled==='boolean')$('mqtt').checked=c.mqtt.enabled;
+ if(c?.mqtt?.host)$('mqttHost').value=c.mqtt.host;
+ if(c?.mqtt?.port)$('mqttPort').value=c.mqtt.port;
+ if(typeof c?.mqtt?.user==='string')$('mqttUser').value=c.mqtt.user;
+ if(c?.mqtt?.passwordSet)$('mqttPassword').placeholder='Lämna tomt för att behålla';
+ if(c?.ssid){$('currentWifi').classList.remove('hide');$('currentWifi').textContent='Nuvarande nätverk: '+c.ssid}
+ mqttUi();
+}
+async function readNet(ix,part=0){
+ await netChar.writeValueWithResponse(new Uint8Array([ix,part]));
+ const v=await netChar.readValue(),b=new Uint8Array(v.buffer,v.byteOffset,v.byteLength);
+ if(b.length<4)throw Error('Ofullständigt nätverkssvar');
+ return{count:b[0],rssi:(b[1]<<24)>>24,secured:!!b[2],len:b[3],bytes:b.slice(4)};
+}
+async function loadNetworks(){
+ $('wifi').disabled=true;$('wifi').replaceChildren(new Option('Söker…',''));
+ const first=await readNet(0),list=[];
+ for(let ix=1;ix<=first.count;ix++){
+   const p0=await readNet(ix,0),name=new Uint8Array(p0.len);name.set(p0.bytes.slice(0,p0.len));
+   for(let part=1;part*16<p0.len;part++){const p=await readNet(ix,part);name.set(p.bytes.slice(0,p0.len-part*16),part*16)}
+   const s=dec.decode(name);if(s)list.push({ssid:s,rssi:p0.rssi,secured:p0.secured});
+ }
+ networks=list.sort((a,b)=>b.rssi-a.rssi);
+ $('wifi').replaceChildren(new Option(list.length?'Välj nätverk':'Inga nätverk hittades',''));
+ for(const n of networks)$('wifi').add(new Option(`${n.ssid} · ${n.rssi} dBm ${n.secured?'🔒':'○'}`,n.ssid));
+ $('wifi').disabled=!list.length;$('manualToggle').classList.remove('hide');
+ if(stored?.ssid){
+   if(networks.some(n=>n.ssid===stored.ssid))$('wifi').value=stored.ssid;
+   else{$('manualWrap').classList.remove('hide');$('manualWifi').value=stored.ssid;$('manualToggle').textContent='Använd nätverkslistan'}
+ }
+ wifiUi();
+}
+async function loadConfig(){
+ try{
+  let bytes=[],total=null;
+  for(let part=0;part<64;part++){
+   await cfgChar.writeValueWithResponse(new Uint8Array([0x10,part]));
+   const v=await cfgChar.readValue(),b=new Uint8Array(v.buffer,v.byteOffset,v.byteLength);
+   if(b.length<4||b[0]!==0)throw Error('Konfigurationsläsning misslyckades');
+   if(total===null)total=b[1]|(b[2]<<8);
+   for(let i=0;i<b[3]&&4+i<b.length;i++)bytes.push(b[4+i]);
+   if(bytes.length>=total)break;
+  }
+  if(total)apply(JSON.parse(dec.decode(new Uint8Array(bytes.slice(0,total)))));
+ }catch(e){stored=null}
+}
+$('connect').onclick=async()=>{
+ if(!navigator.bluetooth||!window.isSecureContext){msg('bleStatus','Web Bluetooth kräver Chrome/Edge och HTTPS.','error');return}
+ try{
+  dev=await navigator.bluetooth.requestDevice({filters:[{services:[SVC]}]});
+  msg('bleStatus','Ansluter via Bluetooth…');
+  const g=await dev.gatt.connect(),s=await g.getPrimaryService(SVC);
+  stateChar=await s.getCharacteristic(STATE);errorChar=await s.getCharacteristic(ERROR);rpcChar=await s.getCharacteristic(RPC);netChar=await s.getCharacteristic(NET);cfgChar=await s.getCharacteristic(CFG);
+  stateChar.addEventListener('characteristicvaluechanged',e=>{if(e.target.value.getUint8(0)===4&&wifiResolve)wifiResolve()});
+  errorChar.addEventListener('characteristicvaluechanged',e=>{const c=e.target.value.getUint8(0);if(c&&wifiReject)wifiReject(Error('WiFi-fel '+c))});
+  await stateChar.startNotifications();await errorChar.startNotifications();
+  await loadConfig();await loadNetworks();$('connect').textContent='Byt Elprisdisplay';
+  msg('bleStatus',stored?'Ansluten. Befintliga inställningar är inlästa.':'Ansluten. Displayen är redo att konfigureras.','ok');ready();
+ }catch(e){msg('bleStatus','Kunde inte ansluta: '+e.message,'error')}
+};
+$('wifi').onchange=wifiUi;$('wifiPassword').oninput=ready;$('manualWifi').oninput=wifiUi;
+$('manualToggle').onclick=()=>{const w=$('manualWrap');w.classList.toggle('hide');$('manualToggle').textContent=w.classList.contains('hide')?'Mitt nätverk syns inte':'Använd nätverkslistan';wifiUi()};
+$('mqtt').onchange=mqttUi;$('mqttHost').oninput=ready;$('mqttPort').oninput=ready;
+
+async function sendConfig(){
+ const m={enabled:$('mqtt').checked,host:$('mqttHost').value.trim(),port:Number($('mqttPort').value)||1883,user:$('mqttUser').value.trim()};
+ if($('mqttPassword').value)m.password=$('mqttPassword').value;
+ const data=enc.encode(JSON.stringify({version:1,zone:$('zone').value,includeVat:$('vat').checked,mqtt:m}));
+ await cfgChar.writeValueWithResponse(new Uint8Array([0x01]));
+ for(let o=0;o<data.length;o+=18){const p=data.slice(o,o+18),b=new Uint8Array(1+p.length);b[0]=0x02;b.set(p,1);await cfgChar.writeValueWithResponse(b)}
+ await cfgChar.writeValueWithResponse(new Uint8Array([0x03]));
+ const r=await cfgChar.readValue();if(r.byteLength&&r.getUint8(0)!==0)throw Error('Inställningarna avvisades');
+}
+async function sendWifi(name,password){
+ const a=enc.encode(name),b=enc.encode(password),p=new Uint8Array(2+1+a.length+1+b.length+1);
+ p[0]=1;p[1]=2+a.length+b.length;p[2]=a.length;p.set(a,3);p[3+a.length]=b.length;p.set(b,4+a.length);p[p.length-1]=p.slice(0,-1).reduce((s,n)=>(s+n)&255,0);
+ return new Promise((resolve,reject)=>{let done=false;const t=setTimeout(()=>finish(Error('WiFi-timeout')),30000);function finish(e){if(done)return;done=true;clearTimeout(t);wifiResolve=wifiReject=null;e?reject(e):resolve()}wifiResolve=()=>finish();wifiReject=e=>finish(e);rpcChar.writeValueWithResponse(p).catch(finish)});
+}
+$('save').onclick=async()=>{
+ saving=true;ready();
+ try{
+  msg('saveStatus','Sparar inställningar…');await sendConfig();
+  const changed=!sameWifi()||$('wifiPassword').value.length||!stored?.ssid;
+  if(changed){msg('saveStatus','Ansluter till '+ssid()+'…');await sendWifi(ssid(),$('wifiPassword').value)}
+  msg('saveStatus','Klart. Displayen startar om…','ok');$('done').classList.remove('hide');
+  $('wifiPassword').value='';$('mqttPassword').value='';
+  await cfgChar.writeValueWithResponse(new Uint8Array([0x20]));
+ }catch(e){msg('saveStatus','Det gick inte att slutföra: '+e.message,'error')}
+ finally{saving=false;ready()}
+};
+if(!window.isSecureContext||!navigator.bluetooth)msg('bleStatus','Använd Chrome/Edge på HTTPS för Web Bluetooth.','error');
+mqttUi();
+})();
+</script>
 </body>
 </html>
