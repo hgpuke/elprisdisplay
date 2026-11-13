@@ -1,2 +1,5 @@
 # elprisdisplay
-Kod för ett Waveshare 3.97-tums e-Paper kort som visar dagens och framtida priser
+Kod för en Waveshare 3.97-tums e-Paper display som visar dagens och framtida el-priser.
+Dagens och morgondagens priser hämtas från NordPool.
+Prognosticerade priser hämtas från Wolta.
+Displayen konfigureras från en ansluten mobil via Improv BLE (BlueTooth)
