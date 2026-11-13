@@ -1,0 +1,12 @@
+# Never publish local credentials
+secrets.h
+**/secrets.h
+
+# Arduino/build output
+*.bin
+*.elf
+*.map
+*.o
+*.a
+build/
+.build/
