@@ -22,7 +22,7 @@
 #endif
 
 // ============================================================================
-// Elprisdisplay 2.0 – v0.1.1
+// Elprisdisplay 2.0 – v2.0
 //
 // Stomme från den senast verifierade v0.9:
 // - PCF85063 RTC i UTC
@@ -2302,7 +2302,7 @@ void setup() {
   }
 
   Serial.println();
-  Serial.println("Elprisdisplay 2.0 v0.2.2 CONFIG DEV 2 BLE NAME FIX");
+  Serial.println("Elprisdisplay 2.0 v2.0 CONFIG DEV 2 BLE NAME FIX");
   Serial.println("======================");
 
   const bool configValid = ep_load_settings();
