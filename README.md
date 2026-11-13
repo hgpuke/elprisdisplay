@@ -5,6 +5,8 @@ En fristående e-paper-display för svenska elpriser, byggd med **ESP32-S3** med
 Displayen visar verkliga och prognostiserade elpriser över 72 timmar, uppdateras automatiskt varje kvart och är konstruerad för låg strömförbrukning genom deep sleep mellan uppdateringarna.
 
 Ingen Home Assistant-installation eller lokal server krävs för normal drift. Displayen behöver bara ström och Wi-Fi.
+<img width="1860" height="1117" alt="image" src="https://github.com/user-attachments/assets/01579199-aa5d-4a52-9ec4-0f2ca1995ac9" />
+
 
 **Konfigurera displayen:**  
 https://hgpuke.github.io/elprisdisplay/
